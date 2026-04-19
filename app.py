@@ -124,89 +124,96 @@ import random
 def generate_ai_feedback(resume_text):
     text = resume_text.lower()
 
-    strengths_pool = []
-    weaknesses_pool = []
-    improvements_pool = []
+    strengths = []
+    weaknesses = []
+    improvements = []
 
-    # -------------------------
-    # SKILL DETECTION
-    # -------------------------
+    # -----------------------------
+    # CORE SKILL SIGNALS
+    # -----------------------------
 
-    if "python" in text:
-        strengths_pool.append("Demonstrates programming experience in Python, which is highly valued in data and software roles.")
+    # TECH
+    if any(word in text for word in ["python", "sql", "data", "machine learning"]):
+        strengths.append("Demonstrates technical proficiency in data or programming-related skills, which are highly valuable in analytical roles.")
     else:
-        weaknesses_pool.append("No evidence of Python experience, which is a key skill in many technical positions.")
-        improvements_pool.append("Consider adding Python projects or coursework to strengthen technical credibility.")
+        weaknesses.append("Limited evidence of technical or analytical skills such as programming or data analysis.")
+        improvements.append("Consider adding technical tools, data analysis experience, or software skills relevant to your target field.")
 
-    if "sql" in text or "database" in text:
-        strengths_pool.append("Shows familiarity with databases and SQL, indicating strong data handling ability.")
+    # BUSINESS / MANAGEMENT
+    if any(word in text for word in ["lead", "managed", "team", "project"]):
+        strengths.append("Shows experience in leadership or project involvement, indicating responsibility and initiative.")
     else:
-        improvements_pool.append("Adding SQL or database experience would improve your data-related skill profile.")
+        improvements.append("Include examples of leadership, teamwork, or project coordination to strengthen managerial appeal.")
 
-    if "project" in text:
-        strengths_pool.append("Includes project experience, which demonstrates applied, hands-on learning.")
+    # COMMUNICATION
+    if any(word in text for word in ["communication", "presented", "client", "customer"]):
+        strengths.append("Highlights strong communication or client interaction skills, which are essential in most professional roles.")
     else:
-        weaknesses_pool.append("Lacks clearly defined project experience.")
-        improvements_pool.append("Add 2–3 structured projects to demonstrate real-world application of your skills.")
+        improvements.append("Add examples of communication, presentations, or client interaction to improve interpersonal skill visibility.")
 
-    if "team" in text or "collabor" in text:
-        strengths_pool.append("Highlights teamwork and collaboration, an important soft skill in professional environments.")
+    # CREATIVE / MARKETING
+    if any(word in text for word in ["design", "content", "marketing", "social media"]):
+        strengths.append("Includes creative or marketing-related experience, showing versatility and audience awareness.")
     else:
-        improvements_pool.append("Include examples of teamwork or collaboration to strengthen interpersonal skill representation.")
+        improvements.append("Consider adding creative, writing, or marketing experience depending on your career goals.")
 
+    # EDUCATION / TRAINING
+    if any(word in text for word in ["taught", "training", "mentored", "education"]):
+        strengths.append("Demonstrates teaching or mentoring experience, which reflects leadership and communication ability.")
+    else:
+        improvements.append("If applicable, include mentoring or training experience to show knowledge transfer skills.")
+
+    # GENERAL QUALITY CHECK
     if len(text) < 400:
-        weaknesses_pool.append("Resume appears somewhat brief and may not fully communicate your experience.")
-        improvements_pool.append("Expand descriptions of roles, projects, and achievements to provide more depth.")
+        weaknesses.append("Resume appears brief and may lack sufficient detail.")
+        improvements.append("Expand bullet points with measurable achievements and specific outcomes.")
 
-    if "leadership" in text:
-        strengths_pool.append("Shows leadership experience, indicating initiative and responsibility.")
-    else:
-        improvements_pool.append("Adding leadership or initiative-based experiences could strengthen your profile.")
+    if "achievement" not in text and "result" not in text and "increased" not in text:
+        improvements.append("Add quantifiable achievements (e.g., improved efficiency by 20%) to strengthen impact.")
 
-    # -------------------------
-    # DIVERSITY ENHANCEMENT
-    # -------------------------
+    # -----------------------------
+    # DIVERSITY LAYER (VARIED OUTPUT)
+    # -----------------------------
 
     extra_strengths = [
-        "Your resume structure suggests a foundational understanding of professional presentation.",
-        "There is evidence of transferable skills that could apply across multiple roles.",
-        "Your experience indicates adaptability and willingness to learn new tools or technologies."
+        "The resume shows transferable skills that can apply across multiple industries.",
+        "There is evidence of adaptability and willingness to learn new tools or environments.",
+        "The structure suggests a developing but promising professional profile."
     ]
 
     extra_improvements = [
-        "Consider quantifying achievements (e.g., percentages, metrics, or outcomes).",
-        "Ensure each role includes clear impact statements rather than just responsibilities.",
-        "Tailor your resume more specifically to the job description for higher relevance.",
-        "Use action verbs such as 'developed', 'led', or 'implemented' to strengthen descriptions."
+        "Tailor your resume more specifically to the job description for better alignment.",
+        "Use stronger action verbs like 'developed', 'led', or 'implemented' to increase impact.",
+        "Ensure each experience includes clear outcomes or measurable results.",
+        "Improve keyword alignment with industry-specific requirements."
     ]
 
-    # randomly add variety so output changes each run
-    strengths_pool += random.sample(extra_strengths, k=1)
-    improvements_pool += random.sample(extra_improvements, k=2)
+    strengths += random.sample(extra_strengths, 1)
+    improvements += random.sample(extra_improvements, 2)
 
-    # -------------------------
+    # -----------------------------
     # FORMAT OUTPUT
-    # -------------------------
+    # -----------------------------
 
     def format_list(items):
         return "\n".join([f"- {item}" for item in items]) if items else "- None identified"
 
     return f"""
-📊 RESUME ANALYSIS REPORT
---------------------------------------
+📊 AI RESUME ANALYSIS
+-----------------------------------
 
 🟢 STRENGTHS:
-{format_list(strengths_pool)}
+{format_list(strengths)}
 
 🔴 WEAKNESSES:
-{format_list(weaknesses_pool)}
+{format_list(weaknesses)}
 
 🟡 SUGGESTED IMPROVEMENTS:
-{format_list(improvements_pool)}
+{format_list(improvements)}
 
---------------------------------------
-Overall Summary:
-Your resume shows a developing professional profile. With targeted improvements in technical depth, project experience, and quantifiable achievements, it can become significantly stronger and more competitive in job applications.
+-----------------------------------
+Overall Insight:
+This resume demonstrates a developing professional profile. With more specific achievements, stronger keyword alignment, and clearer impact statements, it can be significantly improved for competitive job applications.
 """
 # -----------------------------
 # Streamlit UI
