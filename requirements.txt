@@ -1,2 +1,6 @@
 streamlit
-PyPDF2
+pypdf
+pdfminer.six
+pdf2image
+pytesseract
+Pillow
