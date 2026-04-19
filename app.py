@@ -19,19 +19,76 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text)
 
 SKILLS_DB = [
-    "python", "java", "c++", "sql", "excel", "machine learning",
-    "data analysis", "communication", "leadership", "project management",
-    "tensorflow", "pandas", "numpy", "powerpoint"
+
+    #TECH / DATA
+    "python", "python programming", "coding in python",
+    "sql", "database", "database management",
+    "excel", "advanced excel", "spreadsheets",
+    "data analysis", "analyzed data", "data-driven",
+    "machine learning", "ml models", "predictive modeling",
+    "automation", "process automation",
+    "tensorflow", "pandas", "numpy",
+
+    #BUSINESS / MANAGEMENT
+    "leadership", "led a team", "team leader",
+    "teamwork", "collaborated with others", "cross-functional team",
+    "communication", "strong communication", "presented findings",
+    "project management", "managed projects", "project coordination",
+    "strategy", "strategic planning",
+    "problem solving", "solved problems", "critical thinking",
+    "time management", "meeting deadlines",
+    "organization", "organizational skills",
+
+    #SALES / MARKETING
+    "sales", "sales experience", "customer acquisition",
+    "marketing", "digital marketing", "social media marketing",
+    "content creation", "created content", "branding",
+    "customer service", "client support", "helped customers",
+    "negotiation", "persuasion", "client relations",
+
+    #FINANCE / ADMIN
+    "budgeting", "managed budgets", "financial planning",
+    "accounting", "bookkeeping",
+    "forecasting", "financial forecasting",
+    "reporting", "prepared reports",
+    "attention to detail", "detail-oriented",
+
+    #HEALTHCARE
+    "patient care", "cared for patients",
+    "medical terminology", "clinical knowledge",
+    "empathy", "patient support",
+    "healthcare experience", "medical experience",
+
+    #EDUCATION
+    "teaching", "taught students", "instruction",
+    "curriculum development", "lesson planning",
+    "mentoring", "guided students",
+    "training", "staff training",
+
+    #CREATIVE / MEDIA
+    "creativity", "creative thinking",
+    "design", "graphic design", "visual design",
+    "writing", "content writing", "copywriting",
+    "editing", "proofreading",
+    "social media", "instagram management", "tiktok content",
+
+    #GENERAL SOFT SKILLS
+    "adaptability", "adapted quickly",
+    "collaboration", "worked with teams",
+    "initiative", "took initiative",
+    "work ethic", "strong work ethic"
 ]
 
 def extract_skills(text):
     text = text.lower()
     found = []
+
     for skill in SKILLS_DB:
         if skill in text:
             found.append(skill)
-    return found
 
+    return list(set(found))
+    
 def get_missing_skills(resume_text, job_desc):
     resume_words = set(resume_text.lower().split())
     job_words = set(job_desc.lower().split())
@@ -39,11 +96,25 @@ def get_missing_skills(resume_text, job_desc):
     return list(missing)[:20]
 
 def calculate_score(found_skills, job_desc):
-    job_words = set(job_desc.lower().split())
-    if len(job_words) == 0:
-        return 0
-    matched = len([word for word in found_skills if word in job_words])
-    return int((matched / len(job_words)) * 100)
+    job_desc = job_desc.lower()
+
+    # find skills mentioned in job description
+    required_skills = [skill for skill in SKILLS_DB if skill in job_desc]
+
+    if len(required_skills) == 0:
+        return 60  # neutral score if job description is unclear
+
+    matched = set(found_skills).intersection(set(required_skills))
+
+    score = (len(matched) / len(required_skills)) * 100
+
+    # soften extremes so it feels realistic
+    if score == 0:
+        score = 15
+    elif score < 30:
+        score += 10
+
+    return int(min(score, 100))
 
 # -----------------------------
 # 🤖 AI FEEDBACK
