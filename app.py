@@ -1,16 +1,8 @@
 import streamlit as st
 import PyPDF2
 import re
-
-# -----------------------------
-# 🔑 CONFIGURE HUGGING_FACE API KEY
-# -----------------------------
+import requests
 import os
-from huggingface_hub import InferenceClient
-client = InferenceClient(
-    model="HuggingFaceH4/zephyr-7b-beta",
-    token=os.getenv("HF_TOKEN")
-)
 
 # -----------------------------
 # Helper Functions
@@ -59,7 +51,14 @@ def calculate_score(found_skills, job_desc):
 # -----------------------------
 def generate_ai_feedback(resume_text):
     try:
-        prompt = f"""
+        API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
+        }
+
+        payload = {
+            "inputs": f"""
 You are a professional resume reviewer.
 
 Analyze this resume and provide:
@@ -70,15 +69,11 @@ Analyze this resume and provide:
 Resume:
 {resume_text}
 """
+        }
 
-        response = client.chat_completion(
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500
-        )
+        response = requests.post(API_URL, headers=headers, json=payload)
 
-        return response.choices[0].message["content"]
+        return response.json()[0]["generated_text"]
 
     except Exception as e:
         return f"Error generating feedback: {e}"
