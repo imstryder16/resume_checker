@@ -72,11 +72,6 @@ def extract_text_from_pdf(file):
     # -----------------------------
     return "ERROR: Unable to extract text from this PDF. The file may be corrupted or unsupported."
     
-resume_text = extract_text_from_pdf(uploaded_file)
-
-if "ERROR" in resume_text:
-    st.error(resume_text)
-    st.stop()
 
 def clean_text(text):
     return re.sub(r'\s+', ' ', text)
