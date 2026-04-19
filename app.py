@@ -60,23 +60,25 @@ def calculate_score(found_skills, job_desc):
 def generate_ai_feedback(resume_text):
     try:
         prompt = f"""
-        You are a professional resume reviewer.
+You are a professional resume reviewer.
 
-        Analyze this resume and provide:
-        - Strengths
-        - Weaknesses
-        - Improvements
+Analyze this resume and provide:
+- Strengths
+- Weaknesses
+- Improvements
 
-        Resume:
-        {resume_text}
-        """
+Resume:
+{resume_text}
+"""
 
-        response = client.text_generation(
-            prompt=prompt,
-            max_new_tokens=500
+        response = client.chat_completion(
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500
         )
 
-        return response
+        return response.choices[0].message["content"]
 
     except Exception as e:
         return f"Error generating feedback: {e}"
