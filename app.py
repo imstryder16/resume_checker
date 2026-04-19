@@ -1,15 +1,16 @@
 import streamlit as st
 import PyPDF2
 import re
-import google.generativeai as genai
 
 # -----------------------------
-# 🔑 CONFIGURE GOOGLE API KEY
+# 🔑 CONFIGURE HUGGING_FACE API KEY
 # -----------------------------
 import os
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+from huggingface_hub import InferenceClient
+client = InferenceClient(
+    model="mistralai/Mistral-7B-Instruct-v0.3",
+    token=os.getenv("HF_TOKEN")
+)
 
 # -----------------------------
 # Helper Functions
@@ -62,20 +63,23 @@ def generate_ai_feedback(resume_text):
         You are a professional resume reviewer.
 
         Analyze this resume and provide:
-        1. Strengths
-        2. Weaknesses
-        3. Specific improvements
+        - Strengths
+        - Weaknesses
+        - Improvements
 
         Resume:
         {resume_text}
         """
 
-        response = model.generate_content(prompt)
-        return response.text
+        response = client.text_generation(
+            prompt=prompt,
+            max_new_tokens=500
+        )
+
+        return response
 
     except Exception as e:
         return f"Error generating feedback: {e}"
-
 # -----------------------------
 # Streamlit UI
 # -----------------------------
