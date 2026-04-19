@@ -57,11 +57,10 @@ def generate_ai_feedback(resume_text):
             "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
         }
 
-        payload = {
-            "inputs": f"""
+        prompt = f"""
 You are a professional resume reviewer.
 
-Analyze this resume and provide:
+Give:
 - Strengths
 - Weaknesses
 - Improvements
@@ -69,11 +68,31 @@ Analyze this resume and provide:
 Resume:
 {resume_text}
 """
+
+        payload = {
+            "inputs": prompt
         }
 
         response = requests.post(API_URL, headers=headers, json=payload)
 
-        return response.json()[0]["generated_text"]
+        # 🟡 STEP 1: check if request failed
+        if response.status_code != 200:
+            return f"API Error {response.status_code}: {response.text}"
+
+        # 🟡 STEP 2: try parsing JSON safely
+        try:
+            data = response.json()
+
+            # Hugging Face sometimes returns list OR dict
+            if isinstance(data, list):
+                return data[0].get("generated_text", str(data))
+            elif isinstance(data, dict):
+                return data.get("generated_text", str(data))
+            else:
+                return str(data)
+
+        except Exception:
+            return f"Invalid JSON response: {response.text}"
 
     except Exception as e:
         return f"Error generating feedback: {e}"
