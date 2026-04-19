@@ -221,7 +221,7 @@ This resume demonstrates a developing professional profile. With more specific a
 
 st.set_page_config(page_title="AI Resume Analyzer", layout="wide")
 
-st.title("📄 AI Resume Analyzer (Gemini Powered)")
+st.title("Resume Analyzer")
 st.write("Upload your resume and compare it with a job description.")
 
 uploaded_file = st.file_uploader("Upload Resume (PDF only)", type=["pdf"])
@@ -262,4 +262,4 @@ else:
     st.info("Please upload a PDF resume to begin.")
 
 st.write("---")
-st.write("Built with Streamlit + Google Gemini")
+st.write("Built with Streamlit")
