@@ -47,26 +47,28 @@ def calculate_score(found_skills, job_desc):
     return int((matched / len(job_words)) * 100)
 
 # -----------------------------
-# 🤖 GEMINI AI FEEDBACK
+# 🤖 AI FEEDBACK
 # -----------------------------
 def generate_ai_feedback(resume_text):
     try:
-        API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+        import time
+
+        API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 
         headers = {
             "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
         }
 
         prompt = f"""
-You are a professional resume reviewer.
+Resume reviewer task:
+
+Resume:
+{resume_text}
 
 Give:
 - Strengths
 - Weaknesses
 - Improvements
-
-Resume:
-{resume_text}
 """
 
         payload = {
@@ -75,24 +77,18 @@ Resume:
 
         response = requests.post(API_URL, headers=headers, json=payload)
 
-        # 🟡 STEP 1: check if request failed
+        # If model is loading, wait and retry once
+        if response.status_code == 503:
+            time.sleep(5)
+            response = requests.post(API_URL, headers=headers, json=payload)
+
         if response.status_code != 200:
             return f"API Error {response.status_code}: {response.text}"
 
-        # 🟡 STEP 2: try parsing JSON safely
-        try:
-            data = response.json()
+        data = response.json()
 
-            # Hugging Face sometimes returns list OR dict
-            if isinstance(data, list):
-                return data[0].get("generated_text", str(data))
-            elif isinstance(data, dict):
-                return data.get("generated_text", str(data))
-            else:
-                return str(data)
-
-        except Exception:
-            return f"Invalid JSON response: {response.text}"
+        # flan-t5 returns list with generated_text
+        return data[0]["generated_text"]
 
     except Exception as e:
         return f"Error generating feedback: {e}"
