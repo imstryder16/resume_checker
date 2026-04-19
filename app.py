@@ -7,13 +7,76 @@ import os
 # Helper Functions
 # -----------------------------
 
+from pypdf import PdfReader
+from pdfminer.high_level import extract_text
+from pdf2image import convert_from_bytes
+import pytesseract
+import io
+
 def extract_text_from_pdf(file):
-    text = ""
-    reader = PyPDF2.PdfReader(file)
-    for page in reader.pages:
-        if page.extract_text():
-            text += page.extract_text()
-    return text
+    """
+    Bulletproof PDF extractor:
+    1. pypdf (fast)
+    2. pdfminer (strong text extraction)
+    3. OCR fallback (for scanned PDFs)
+    """
+
+    file_bytes = file.read()
+
+    # -----------------------------
+    # LAYER 1: PyPDF (fast)
+    # -----------------------------
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+        text = ""
+
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
+
+        if text.strip():
+            return text
+
+    except:
+        pass
+
+    # -----------------------------
+    # LAYER 2: PDFMiner (stronger text extraction)
+    # -----------------------------
+    try:
+        text = extract_text(io.BytesIO(file_bytes))
+        if text and text.strip():
+            return text
+    except:
+        pass
+
+    # -----------------------------
+    # LAYER 3: OCR (scanned PDFs)
+    # -----------------------------
+    try:
+        images = convert_from_bytes(file_bytes)
+        ocr_text = ""
+
+        for img in images:
+            ocr_text += pytesseract.image_to_string(img)
+
+        if ocr_text.strip():
+            return ocr_text
+
+    except:
+        pass
+
+    # -----------------------------
+    # FINAL FALLBACK
+    # -----------------------------
+    return "ERROR: Unable to extract text from this PDF. The file may be corrupted or unsupported."
+    
+resume_text = extract_text_from_pdf(uploaded_file)
+
+if "ERROR" in resume_text:
+    st.error(resume_text)
+    st.stop()
 
 def clean_text(text):
     return re.sub(r'\s+', ' ', text)
